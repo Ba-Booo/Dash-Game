@@ -41,6 +41,7 @@ public class PlayerController : MonoBehaviour
         if( Input.GetKey( KeyCode.LeftShift) )
         {
             DashMove(); //보류
+            SettingAttackRange(8, 3);
         }
         else
         {
@@ -50,8 +51,7 @@ public class PlayerController : MonoBehaviour
 
         if( Input.GetMouseButtonDown(0) )
         {
-            //Attack();
-            SettingAttackRange();
+            SettingAttackRange(4, 3);
         }
 
     }
@@ -80,8 +80,6 @@ public class PlayerController : MonoBehaviour
             transform.position = new Vector2(transform.position.x + moveX, transform.position.y + moveY);
             
         }
-        
-       
        
     }
 
@@ -94,9 +92,9 @@ public class PlayerController : MonoBehaviour
     private void Jump()
     {
 
-        if( Input.GetKeyDown( KeyCode.Space ) )
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            rb.AddForce( Vector2.up * jumpPower, ForceMode2D.Impulse );
+            rb.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
         }
 
     }
@@ -106,59 +104,29 @@ public class PlayerController : MonoBehaviour
 
 
     #region 공격
-
-    private void Attack()
-    {
-
-        //마우스 위치에따라 공격 방향 바뀜
-        if (transform.position.x <= mouseTransform.position.x)
-        {
-            attackBoxPosition = (Vector2)transform.position + new Vector2(2f, 0);
-        }
-        else
-        {
-            attackBoxPosition = (Vector2)transform.position + new Vector2(-2f, 0);
-        }
-
-        //공격 범위
-        attackBoxSize = new Vector2(5, 3);
-
-
-        Collider2D[] colliders = Physics2D.OverlapBoxAll(attackBoxPosition, attackBoxSize, 0);
-
-        foreach(Collider2D collider in colliders)
-        {
-            if(collider.name == "Reactionary")
-            {
-                Debug.Log("호옹이");
-            }
-        }
-
-
-    }
-
-    private void SettingAttackRange()
+    
+    private void SettingAttackRange(float attackRangeSizeX, float attackRangeSizeY)
     {
 
         //방향조절
         Vector2 mouseDistance = mouseTransform.position - transform.position;
         attackAngle = Mathf.Atan2(mouseDistance.y, mouseDistance.x);
 
-        //위치
-        attackBoxPosition = new Vector2(transform.position.x + (Mathf.Cos(attackAngle) * 2), transform.position.y + (Mathf.Sin(attackAngle) * 2));        //삼각함수 안쓰면 중앙 기준으로 콜라이더 생성됨
-
         //크기
         int groundLayerMask = 1 << LayerMask.NameToLayer("Ground");
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, mouseTransform.position - transform.position, 5f, groundLayerMask);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, mouseTransform.position - transform.position, attackRangeSizeX, groundLayerMask);
 
         if (hit)
         {
-            attackBoxSize = new Vector2(Vector3.Distance(transform.position, hit.point), 3);
+            attackBoxSize = new Vector2(Vector3.Distance(transform.position, hit.point), attackRangeSizeY);
         }
         else
         {
-            attackBoxSize = new Vector2(5, 3);
+            attackBoxSize = new Vector2(attackRangeSizeX, attackRangeSizeY);
         }
+        
+        //위치
+        attackBoxPosition = new Vector2(transform.position.x + (Mathf.Cos(attackAngle) * attackBoxSize.x / 2), transform.position.y + (Mathf.Sin(attackAngle) * attackBoxSize.x / 2) );        //삼각함수 안쓰면 중앙 기준으로 콜라이더 생성됨
         
         //콜라이더 생성
         Collider2D[] colliders = Physics2D.OverlapBoxAll(attackBoxPosition, attackBoxSize, attackAngle * Mathf.Rad2Deg );
@@ -167,29 +135,11 @@ public class PlayerController : MonoBehaviour
         {
             if (collider.name == "Reactionary")
             {
-                Debug.Log("으아아아으아아아으아아아으아아아으아아아으아아아으아아아으아아아으아아아으아아아으아아아으아아아으아아아으아아아으아아아");
+                Debug.Log("으아아아");
             }
         }
 
     }
-
-    // private void SettingAttackRange(float attackRangePosition, float attackRangeSizeX, float attackRangeSizeY)
-    // {
-    //     attackBoxSize = new Vector2(attackRangeSizeX, attackRangeSizeY);
-
-    //     attackBoxPosition = (Vector2)transform.position + new Vector2(2f, 0);
-
-    //     Collider2D[] colliders = Physics2D.OverlapBoxAll(attackBoxPosition, attackBoxSize, Mathf.Atan2( mouseTransform.position.x, mouseTransform.position.y ) );
-
-    //     foreach (Collider2D collider in colliders)
-    //     {
-    //         if (collider.name == "Reactionary")
-    //         {
-    //             Debug.Log("으아아아");
-    //         }
-    //     }
-
-    // }
 
     private void OnDrawGizmos()     //테스트테스트테스트테스트
     {
